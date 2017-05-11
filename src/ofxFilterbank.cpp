@@ -21,6 +21,9 @@ void ofxFilterbank::setup(int iBufferSize, int iMidiMin, int iMidiMax, int iChan
     smoothAmnt = 0.7;
     estimateMax = 0.2;
 
+    energyMax = 0;
+    nMax = 0;
+
     treshold = 0.02;
     showAll = true;
 
@@ -85,9 +88,20 @@ void ofxFilterbank::analyze(float * iBuffer){
 
 	 //Smoothing...
 
+    energyMax = 0;
+    nMax = midiMaxVar-1;
+
     for (int n=midiMaxVar-1; n>=midiMinVar;n--){
         energies[n] /= (left.size()*channels);
         energies[n] = sqrt(energies[n]);
+
+        if (energies[n] > energyMax) {
+
+            energyMax = energies[n];
+            nMax = n;
+
+        }
+
         smth_energies[n] *= smoothAmnt;
         smth_energies[n] += (1-smoothAmnt) * energies[n];
         ///mask
@@ -115,6 +129,14 @@ void ofxFilterbank::exit(){
     free (fdata);
     
 }
+
+int ofxFilterbank::getFundamentalFrequency() {
+
+    return nMax;
+
+}
+
+
 //--------------------------------------------------------------
 void ofxFilterbank::draw(int w, int h){
 
@@ -137,6 +159,11 @@ void ofxFilterbank::draw(int w, int h){
             ofLine(step*(n-midiMinVar), h, step*(n-midiMinVar), h-ener );
         }
     }
+
+    ofSetColor(255, 0, 0);
+    ofSetLineWidth(5);
+    float enerMax = ofMap (log_smth_energies[nMax], -45.0, LIN2dB(estimateMax), 0.0, h, true);
+    ofLine(step*(nMax-midiMinVar), h, step*(nMax-midiMinVar), h-enerMax );
 
     ofSetColor(80);
     float logTresh = LIN2dB(treshold);

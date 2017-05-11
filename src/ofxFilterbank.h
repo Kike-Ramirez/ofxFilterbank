@@ -31,10 +31,14 @@ class ofxFilterbank
         float* getLeftBuffer(){return &left[0];}
         float* getRightBuffer(){return &right[0];}
         float getPitchDev(){return pitchDev;}
+        int getFundamentalFrequency();
     
 		bool showAll;
         float smoothAmnt, treshold, estimateMax, maskAmnt, pitchDev, pitchFader;
         int midiMin, midiMax, midiMinVar, midiMaxVar;
+
+        float energyMax;
+        int nMax;
     
     
 
